@@ -1,2 +1,2 @@
-# codecgen
-Codec codegen in Gleam!
+# serdegen
+JSON serialization/deserialization codegen in Gleam!

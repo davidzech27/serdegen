@@ -1,14 +1,17 @@
-name = "codecgen"
+name = "serdegen"
 version = "1.0.0"
 
 licences = ["Apache-2.0"]
-description = "Codec codegen in Gleam"
-repository = { type = "github", user = "davidzech27", repo = "codecgen" }
+description = "JSON serialization/deserialization codegen in Gleam"
+repository = { type = "github", user = "davidzech27", repo = "serdegen" }
 
 [dependencies]
 gleam_stdlib = ">= 0.34.0 and < 2.0.0"
 simplifile = ">= 2.1.0 and < 3.0.0"
 argv = ">= 1.0.2 and < 2.0.0"
+gleam_json = ">= 2.0.0 and < 3.0.0"
+filespy = ">= 0.5.0 and < 1.0.0"
+gleam_erlang = ">= 0.26.0 and < 1.0.0"
 
 [dev-dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"

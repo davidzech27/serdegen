@@ -1,4 +1,3 @@
-import gleam/int
 import gleam/list
 import gleam/option
 import gleam/pair
@@ -14,7 +13,11 @@ pub type TypeDefinition {
 }
 
 pub type Variant {
-  Variant(name: String, fields: List(#(String, TypeReference)))
+  Variant(name: String, fields: List(Field))
+}
+
+pub type Field {
+  Field(name: option.Option(String), type_reference: TypeReference)
 }
 
 pub type TypeReference {
@@ -29,14 +32,14 @@ pub type TypeReference {
   CustomReference(name: String)
 }
 
-pub fn parse_type_file(type_file: file.TypeFile) {
+pub fn parse_type_file(type_file: file.File) {
   type_file.contents
   |> regex.scan(
     regex.compile(
       "^pub type ([A-Z][a-zA-Z0-9_]*) {\\s*([^}]+?)\\s*}",
       regex.Options(case_insensitive: False, multi_line: True),
     )
-      |> result.lazy_unwrap(fn() { panic }),
+      |> result.lazy_unwrap(fn() { panic as "Invalid regex." }),
     _,
   )
   |> list.map(fn(match) {
@@ -44,7 +47,7 @@ pub fn parse_type_file(type_file: file.TypeFile) {
       [option.Some(name), option.Some(variants_string)] ->
         parse_variants(variants_string)
         |> result.map(TypeDefinition(name, _))
-      _ -> panic
+      _ -> panic as "Invalid submatches."
     }
   })
   |> error.collect_multi_error
@@ -160,22 +163,20 @@ fn parse_fields(fields_string: String) {
   use field_strings <- result.try(split_fields(fields_string))
 
   field_strings
-  |> list.index_map(parse_field)
+  |> list.map(parse_field)
   |> error.collect_multi_error
 }
 
-fn parse_field(field_string: String, field_index: Int) {
+fn parse_field(field_string: String) {
   case string.split_once(field_string, ":") {
     Ok(#(name, type_reference_string)) ->
       parse_type_reference(type_reference_string |> string.trim_left)
       |> result.map(fn(type_reference) {
-        #(name |> string.trim_right, type_reference)
+        Field(option.Some(name |> string.trim_right), type_reference)
       })
     Error(_) ->
       parse_type_reference(field_string)
-      |> result.map(fn(type_reference) {
-        #(int.to_string(field_index), type_reference)
-      })
+      |> result.map(fn(type_reference) { Field(option.None, type_reference) })
   }
 }
 
@@ -235,10 +236,7 @@ fn parse_type_reference(
             Error(error) -> Error(error)
           }
         _ ->
-          Error(error.ParseError(
-            "Generics in type definitions are not yet supported."
-            <> #(name, body_string) |> string.inspect,
-          ))
+          Error(error.ParseError("Generic custom types are not yet supported."))
       }
     Error(_) ->
       case type_reference_string {
