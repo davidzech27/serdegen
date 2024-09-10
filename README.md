@@ -1,5 +1,4 @@
 # serdegen
 JSON serialization/deserialization codegen in Gleam!
 
-https://github.com/user-attachments/assets/fd6cdfe6-eeba-4b03-b0dc-e42f7353995e
-
+https://github.com/user-attachments/assets/654b9cb0-4d8a-43f7-989a-83044a651b59
